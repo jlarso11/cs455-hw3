@@ -1,5 +1,6 @@
 package cs455.hadoop.mindelay;
 
+import cs455.hadoop.utils.MapSorts;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -14,21 +15,6 @@ import java.util.*;
 public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
     private static Map<Text, IntWritable> countMap = new HashMap<>();
-
-    public static Map<Text,IntWritable> sortByValues(Map<Text,IntWritable> map, int sortDirection){
-
-        List<Map.Entry<Text,IntWritable>> entries = new LinkedList<>(map.entrySet());
-
-        Collections.sort(entries, (o1, o2) -> sortDirection*o1.getValue().compareTo(o2.getValue()));
-
-        Map<Text,IntWritable> sortedMap = new LinkedHashMap<>();
-
-        for(Map.Entry<Text,IntWritable> entry: entries){
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
-        return sortedMap;
-    }
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
@@ -47,7 +33,7 @@ public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWr
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        Map<Text, IntWritable> sortedMap = sortByValues(countMap, 1);
+        Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(countMap, 1);
 
         for(Map.Entry<Text, IntWritable> entry : sortedMap.entrySet()) {
             context.write(entry.getKey(), entry.getValue());
