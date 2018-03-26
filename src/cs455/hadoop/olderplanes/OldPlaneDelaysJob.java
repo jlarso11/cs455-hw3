@@ -7,6 +7,8 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
@@ -23,18 +25,15 @@ public class OldPlaneDelaysJob {
             // Current class.
             job.setJarByClass(OldPlaneDelaysJob.class);
 
-            // Mapper
-            job.setMapperClass(OldPlaneDelaysMapper.class);
-
-            // Combiner. We use the reducer as the combiner in this case.
-            job.setCombinerClass(TotalCountCombiner.class);
+            MultipleInputs.addInputPath(job,new Path(args[0]), TextInputFormat.class, OldPlaneDelaysMapper1.class);
+            MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class, OldPlaneDelaysMapper2.class);
 
             // Reducer
             job.setReducerClass(OldPlaneDelaysReducer.class);
 
             // Outputs from the Mapper.
             job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(IntWritable.class);
+            job.setMapOutputValueClass(Text.class);
 
             // Outputs from Reducer. It is sufficient to set only the following two properties
             // if the Mapper and Reducer has same key and value types. It is set separately for
@@ -42,8 +41,6 @@ public class OldPlaneDelaysJob {
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(IntWritable.class);
 
-            // path to input in HDFS
-            FileInputFormat.addInputPath(job, new Path(args[0]));
             // path to output in HDFS
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
             // Block until the job is completed.
