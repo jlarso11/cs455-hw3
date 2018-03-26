@@ -1,6 +1,6 @@
 package cs455.hadoop.cityweatherdelay;
 
-import cs455.hadoop.mindelay.AverageCombiner;
+import cs455.hadoop.utils.TotalCountCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;

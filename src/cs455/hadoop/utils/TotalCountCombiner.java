@@ -1,4 +1,4 @@
-package cs455.hadoop.mostpopularairports;
+package cs455.hadoop.utils;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;

@@ -1,6 +1,6 @@
-package cs455.hadoop.mindelay;
+package cs455.hadoop.olderplanes;
 
-import cs455.hadoop.utils.AverageCombiner;
+import cs455.hadoop.utils.TotalCountCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -14,23 +14,23 @@ import java.io.IOException;
 /**
  * This is the main class. Hadoop will invoke the main method of this class.
  */
-public class BestTimeOfWeekToFlyJob {
+public class OldPlaneDelaysJob {
     public static void main(String[] args) {
         try {
             Configuration conf = new Configuration();
             // Give the MapRed job a name. You'll see this name in the Yarn webapp.
             Job job = Job.getInstance(conf, "word count");
             // Current class.
-            job.setJarByClass(BestTimeOfWeekToFlyJob.class);
+            job.setJarByClass(OldPlaneDelaysJob.class);
 
             // Mapper
-            job.setMapperClass(BestDayToFlyMapper.class);
+            job.setMapperClass(OldPlaneDelaysMapper.class);
 
             // Combiner. We use the reducer as the combiner in this case.
-            job.setCombinerClass(AverageCombiner.class);
+            job.setCombinerClass(TotalCountCombiner.class);
 
             // Reducer
-            job.setReducerClass(BestTimeToFlyReducer.class);
+            job.setReducerClass(OldPlaneDelaysReducer.class);
 
             // Outputs from the Mapper.
             job.setMapOutputKeyClass(Text.class);

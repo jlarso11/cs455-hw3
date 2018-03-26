@@ -1,5 +1,6 @@
 package cs455.hadoop.mindelay;
 
+import cs455.hadoop.utils.AverageCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
