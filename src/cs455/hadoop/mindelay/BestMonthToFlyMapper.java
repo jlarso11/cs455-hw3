@@ -7,21 +7,12 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
+import static cs455.hadoop.utils.TypeCheckUtil.isInteger;
+
 /**
  * Mapper: Reads line by line, split them into words. Emit <word, 1> pairs.
  */
 public class BestMonthToFlyMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
-
-    private boolean isInteger( String input ) {
-        try {
-            Integer.parseInt( input );
-            return true;
-        }
-        catch( Exception e ) {
-            return false;
-        }
-    }
-
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         if(key.equals(new LongWritable(0))) {
