@@ -12,7 +12,7 @@ import static cs455.hadoop.utils.TypeCheckUtil.isInteger;
 /**
  * Mapper: Reads line by line, split them into words. Emit <word, 1> pairs.
  */
-public class CityWithMostWeatherDelaysMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class CityWithMostWeatherDelaysMapper1 extends Mapper<LongWritable, Text, Text, Text> {
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         if(key.equals(new LongWritable(0))) {
@@ -22,14 +22,16 @@ public class CityWithMostWeatherDelaysMapper extends Mapper<LongWritable, Text, 
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        if(isInteger(individualValues[25]) && Integer.parseInt(individualValues[25]) > 0) {
-            String originKey = individualValues[16];
+        if(individualValues.length > 17) {
+            if(individualValues.length >= 25 && isInteger(individualValues[25]) && Integer.parseInt(individualValues[25]) > 0) {
+                String originKey = individualValues[16];
 
-            context.write(new Text(originKey), new IntWritable(1));
+                context.write(new Text(originKey), new Text("F1-" + value.toString()));
 
-            String destKey = individualValues[17];
+                String destKey = individualValues[17];
 
-            context.write(new Text(destKey), new IntWritable(1));
+                context.write(new Text(destKey), new Text("F1-" + value.toString()));
+            }
         }
     }
 }
