@@ -50,8 +50,13 @@ public class CityWithMostWeatherDelaysReducer extends Reducer<Text, Text, Text, 
     protected void cleanup(Context context) throws IOException, InterruptedException {
         Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(countMap, -1);
 
+        int counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedMap.entrySet()) {
+            if(counter  == 10) {
+                return;
+            }
             context.write(entry.getKey(), entry.getValue());
+            counter++;
         }
     }
 }
