@@ -12,7 +12,7 @@ import static cs455.hadoop.utils.TypeCheckUtil.isInteger;
 /**
  * Mapper: Reads line by line, split them into words. Emit <word, 1> pairs.
  */
-public class CarrierDelaysMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class CarrierDelaysMapper2 extends Mapper<LongWritable, Text, Text, Text> {
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         if(key.equals(new LongWritable(0))) {
@@ -22,21 +22,9 @@ public class CarrierDelaysMapper extends Mapper<LongWritable, Text, Text, IntWri
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        String mapperKey = individualValues[9];
+        String mapperKey = individualValues[0];
+        mapperKey = mapperKey.replace("\"", "");
 
-        if(individualValues.length > 16) {
-            int totalDelay = 0;
-
-            if (isInteger(individualValues[14])) {
-                totalDelay += Integer.parseInt(individualValues[14]);
-            }
-            if (isInteger(individualValues[15])) {
-                totalDelay += Integer.parseInt(individualValues[15]);
-            }
-
-            if(totalDelay > 0) {
-                context.write(new Text(mapperKey), new IntWritable(totalDelay));
-            }
-        }
+        context.write(new Text(mapperKey), new Text("F2-" + value.toString()));
     }
 }
