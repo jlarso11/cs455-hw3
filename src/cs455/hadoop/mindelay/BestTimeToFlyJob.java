@@ -8,23 +8,25 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
 /**
  * This is the main class. Hadoop will invoke the main method of this class.
  */
-public class BestTimeOfWeekToFlyJob {
+public class BestTimeToFlyJob {
     public static void main(String[] args) {
         try {
             Configuration conf = new Configuration();
             // Give the MapRed job a name. You'll see this name in the Yarn webapp.
             Job job = Job.getInstance(conf, "word count");
             // Current class.
-            job.setJarByClass(BestTimeOfWeekToFlyJob.class);
+            job.setJarByClass(BestTimeToFlyJob.class);
 
             // Mapper
-            job.setMapperClass(BestDayToFlyMapper.class);
+            job.setMapperClass(BestTimeToFlyMapper.class);
 
             // Combiner. We use the reducer as the combiner in this case.
             job.setCombinerClass(AverageCombiner.class);
@@ -46,6 +48,12 @@ public class BestTimeOfWeekToFlyJob {
             FileInputFormat.addInputPath(job, new Path(args[0]));
             // path to output in HDFS
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
+
+            MultipleOutputs.addNamedOutput(job, "bestDay", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "bestHour", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "bestMonth", TextOutputFormat.class, Text.class, IntWritable.class);
+
+
             // Block until the job is completed.
             System.exit(job.waitForCompletion(true) ? 0 : 1);
         } catch (IOException e) {
