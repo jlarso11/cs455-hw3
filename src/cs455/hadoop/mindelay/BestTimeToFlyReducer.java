@@ -52,21 +52,44 @@ public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWr
     protected void cleanup(Context context) throws IOException, InterruptedException {
         Map<Text, IntWritable> sortedDayAverage = MapSorts.sortByValues(dayCountMap, 1);
 
-        for(Map.Entry<Text, IntWritable> entry : sortedDayAverage.entrySet()) {
-            mos.write("bestDay", entry.getKey(), entry.getValue());
-        }
+        int minValue = MapSorts.getMinimum(dayCountMap);
+        int maxValue = MapSorts.getMaximum(dayCountMap);
 
+        for(Map.Entry<Text, IntWritable> entry : sortedDayAverage.entrySet()) {
+            if(entry.getValue().get() == minValue) {
+                mos.write("bestDay", entry.getKey(), entry.getValue());
+            } else if(entry.getValue().get() == maxValue) {
+                mos.write("worstDay", entry.getKey(), entry.getValue());
+            }
+        }
 
         Map<Text, IntWritable> sortedMonthAverage = MapSorts.sortByValues(monthCountMap, 1);
 
+        minValue = MapSorts.getMinimum(monthCountMap);
+        maxValue = MapSorts.getMaximum(monthCountMap);
+
         for(Map.Entry<Text, IntWritable> entry : sortedMonthAverage.entrySet()) {
-            mos.write("bestMonth", entry.getKey(), entry.getValue());
+            if(entry.getValue().get() == minValue) {
+                mos.write("bestMonth", entry.getKey(), entry.getValue());
+            } else if(entry.getValue().get() == maxValue) {
+                mos.write("worstMonth", entry.getKey(), entry.getValue());
+            }
+
         }
 
         Map<Text, IntWritable> sortedHourAverage = MapSorts.sortByValues(hourCountMap, 1);
 
+        minValue = MapSorts.getMinimum(hourCountMap);
+        maxValue = MapSorts.getMaximum(hourCountMap);
+
         for(Map.Entry<Text, IntWritable> entry : sortedHourAverage.entrySet()) {
-            mos.write("bestHour", entry.getKey(), entry.getValue());
+            if(entry.getValue().get() == minValue) {
+                mos.write("bestHour", entry.getKey(), entry.getValue());
+            } else if(entry.getValue().get() == maxValue) {
+                mos.write("worstHour", entry.getKey(), entry.getValue());
+            }
         }
+
+        mos.close();
     }
 }

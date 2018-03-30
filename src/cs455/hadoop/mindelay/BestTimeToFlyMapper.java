@@ -42,7 +42,7 @@ public class BestTimeToFlyMapper extends Mapper<LongWritable, Text, Text, IntWri
         }
 
         String dayKey = individualValues[3];
-        String monthKey = individualValues[2];
+        String monthKey = individualValues[1];
 
         context.write(new Text("Day-" + dayKey), new IntWritable(totalDelay));
         context.write(new Text("Month-"+monthKey), new IntWritable(totalDelay));

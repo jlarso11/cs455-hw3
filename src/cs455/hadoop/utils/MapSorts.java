@@ -22,4 +22,28 @@ public class MapSorts {
         return sortedMap;
     }
 
+    public static int getMinimum(Map<Text,IntWritable> map) {
+        int min = Integer.MAX_VALUE;
+
+        for (Map.Entry<Text,IntWritable> entry : map.entrySet())
+        {
+            if(min > entry.getValue().get()) {
+                min = entry.getValue().get();
+            }
+        }
+        return min;
+    }
+
+    public static int getMaximum(Map<Text,IntWritable> map) {
+        int max = Integer.MIN_VALUE;
+
+        for (Map.Entry<Text,IntWritable> entry : map.entrySet())
+        {
+            if(max < entry.getValue().get()) {
+                max = entry.getValue().get();
+            }
+        }
+        return max;
+    }
+
 }

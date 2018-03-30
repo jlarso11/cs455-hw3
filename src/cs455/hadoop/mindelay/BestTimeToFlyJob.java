@@ -53,6 +53,10 @@ public class BestTimeToFlyJob {
             MultipleOutputs.addNamedOutput(job, "bestHour", TextOutputFormat.class, Text.class, IntWritable.class);
             MultipleOutputs.addNamedOutput(job, "bestMonth", TextOutputFormat.class, Text.class, IntWritable.class);
 
+            MultipleOutputs.addNamedOutput(job, "worstDay", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "worstHour", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "worstMonth", TextOutputFormat.class, Text.class, IntWritable.class);
+
 
             // Block until the job is completed.
             System.exit(job.waitForCompletion(true) ? 0 : 1);
