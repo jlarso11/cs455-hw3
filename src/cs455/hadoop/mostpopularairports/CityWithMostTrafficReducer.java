@@ -15,10 +15,11 @@ import java.util.Map;
  */
 public class CityWithMostTrafficReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-    private static Map<Text, IntWritable> countMap = new HashMap<>();
+    private static Map<String, Map<Text, IntWritable>> countMap = new HashMap<>();
+
 
     @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<IntWritable> values, Context context) {
         int count = 0;
 
         for(IntWritable val : values){
@@ -27,15 +28,34 @@ public class CityWithMostTrafficReducer extends Reducer<Text, IntWritable, Text,
 
         IntWritable totalCount = new IntWritable(count);
 
-        countMap.put(new Text(key), totalCount);
+        String[] keySplit = key.toString().split(",");
+        if(keySplit.length > 1) {
+            String year = keySplit[0];
+
+            if(!countMap.containsKey(year)) {
+                Map<Text, IntWritable> localCountMap = new HashMap<>();
+                countMap.put(year, localCountMap);
+            }
+
+            countMap.get(year).put(new Text(keySplit[1]), totalCount);
+        }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(countMap, -1);
 
-        for(Map.Entry<Text, IntWritable> entry : sortedMap.entrySet()) {
-            context.write(entry.getKey(), entry.getValue());
+        for(Map.Entry<String, Map<Text, IntWritable>> entry : countMap.entrySet()) {
+            Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(entry.getValue(), -1);
+
+            context.write(new Text(entry.getKey()), new IntWritable(-1));
+            int counter = 0;
+            for(Map.Entry<Text, IntWritable> yearEntry : sortedMap.entrySet()) {
+                if(counter == 10) {
+                    break;
+                }
+                context.write(yearEntry.getKey(), yearEntry.getValue());
+                counter++;
+            }
         }
     }
 }
