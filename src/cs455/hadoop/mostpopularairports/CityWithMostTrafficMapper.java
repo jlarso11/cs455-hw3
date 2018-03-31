@@ -20,13 +20,12 @@ public class CityWithMostTrafficMapper extends Mapper<LongWritable, Text, Text, 
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        String originKey = individualValues[0] + "," + individualValues[16];
+        if(individualValues.length > 18) {
+            String originKey = individualValues[0] + "," + individualValues[16];
+            context.write(new Text(originKey), new IntWritable(1));
 
-        context.write(new Text(originKey), new IntWritable(1));
-
-        String destKey = individualValues[0] + "," + individualValues[17];
-
-        context.write(new Text(destKey), new IntWritable(1));
-
+            String destKey = individualValues[0] + "," + individualValues[17];
+            context.write(new Text(destKey), new IntWritable(1));
+        }
     }
 }
