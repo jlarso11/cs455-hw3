@@ -25,6 +25,8 @@ public class CarrierDelaysMapper2 extends Mapper<LongWritable, Text, Text, Text>
         String mapperKey = individualValues[0];
         mapperKey = mapperKey.replace("\"", "");
 
-        context.write(new Text(mapperKey), new Text("F2-" + value.toString()));
+        if(individualValues.length > 1) {
+            context.write(new Text(mapperKey), new Text("F2-" + individualValues[1]));
+        }
     }
 }

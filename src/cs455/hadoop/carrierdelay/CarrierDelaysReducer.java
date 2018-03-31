@@ -41,7 +41,6 @@ public class CarrierDelaysReducer extends Reducer<Text, Text, Text, Text> {
                 total++;
                 totalMinutes += Integer.parseInt(fileSplit[1]);
             }
-            context.write(key, value);
         }
 
         if(!"".equals(carrierName)) {
