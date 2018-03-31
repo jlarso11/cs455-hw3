@@ -19,9 +19,9 @@ public class OldPlaneDelaysMapper2 extends Mapper<LongWritable, Text, Text, Text
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        String originKey = individualValues[0];
-
-        context.write(new Text(originKey), new Text("F2-" + value.toString()));
-
+        if(individualValues.length > 8) {
+            String originKey = individualValues[0];
+            context.write(new Text(originKey), new Text("F2-" + individualValues[8]));
+        }
     }
 }

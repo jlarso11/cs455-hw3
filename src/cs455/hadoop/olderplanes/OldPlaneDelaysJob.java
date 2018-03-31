@@ -4,6 +4,7 @@ import cs455.hadoop.utils.TotalCountCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -39,7 +40,7 @@ public class OldPlaneDelaysJob {
             // if the Mapper and Reducer has same key and value types. It is set separately for
             // elaboration.
             job.setOutputKeyClass(Text.class);
-            job.setOutputValueClass(IntWritable.class);
+            job.setOutputValueClass(LongWritable.class);
 
             // path to output in HDFS
             FileOutputFormat.setOutputPath(job, new Path(args[1]));
