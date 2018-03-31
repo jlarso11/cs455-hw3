@@ -26,7 +26,7 @@ public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWr
     }
 
     @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<IntWritable> values, Context context) {
         int totalNumber = 0;
         int count = 0;
 
@@ -38,40 +38,42 @@ public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWr
         IntWritable average = new IntWritable(count/totalNumber);
 
         String[] keySplit = key.toString().split("-");
-        if("hour".equalsIgnoreCase(keySplit[0])) {
-            hourCountMap.put(new Text(keySplit[1]), average);
-        } else if("day".equalsIgnoreCase(keySplit[0])) {
-            dayCountMap.put(new Text(keySplit[1]), average);
-        } else if("month".equalsIgnoreCase(keySplit[0])) {
-            monthCountMap.put(new Text(keySplit[1]), average);
-        }
 
+        if(keySplit.length > 1) {
+            if("hour".equalsIgnoreCase(keySplit[0])) {
+                hourCountMap.put(new Text(keySplit[1]), average);
+            } else if("day".equalsIgnoreCase(keySplit[0])) {
+                dayCountMap.put(new Text(keySplit[1]), average);
+            } else if("month".equalsIgnoreCase(keySplit[0])) {
+                monthCountMap.put(new Text(keySplit[1]), average);
+            }
+        }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
         Map<Text, IntWritable> sortedDayAverage = MapSorts.sortByValues(dayCountMap, 1);
 
-        int minValue = MapSorts.getMinimum(dayCountMap);
-        int maxValue = MapSorts.getMaximum(dayCountMap);
+        int dayMinValue = MapSorts.getMinimum(dayCountMap);
+        int dayMaxValue = MapSorts.getMaximum(dayCountMap);
 
         for(Map.Entry<Text, IntWritable> entry : sortedDayAverage.entrySet()) {
-            if(entry.getValue().get() == minValue) {
+            if(entry.getValue().get() == dayMinValue) {
                 mos.write("bestDay", entry.getKey(), entry.getValue());
-            } else if(entry.getValue().get() == maxValue) {
+            } else if(entry.getValue().get() == dayMaxValue) {
                 mos.write("worstDay", entry.getKey(), entry.getValue());
             }
         }
 
         Map<Text, IntWritable> sortedMonthAverage = MapSorts.sortByValues(monthCountMap, 1);
 
-        minValue = MapSorts.getMinimum(monthCountMap);
-        maxValue = MapSorts.getMaximum(monthCountMap);
+        int monthMinValue = MapSorts.getMinimum(monthCountMap);
+        int monthMaxValue = MapSorts.getMaximum(monthCountMap);
 
         for(Map.Entry<Text, IntWritable> entry : sortedMonthAverage.entrySet()) {
-            if(entry.getValue().get() == minValue) {
+            if(entry.getValue().get() == monthMinValue) {
                 mos.write("bestMonth", entry.getKey(), entry.getValue());
-            } else if(entry.getValue().get() == maxValue) {
+            } else if(entry.getValue().get() == monthMaxValue) {
                 mos.write("worstMonth", entry.getKey(), entry.getValue());
             }
 
@@ -79,13 +81,13 @@ public class BestTimeToFlyReducer extends Reducer<Text, IntWritable, Text, IntWr
 
         Map<Text, IntWritable> sortedHourAverage = MapSorts.sortByValues(hourCountMap, 1);
 
-        minValue = MapSorts.getMinimum(hourCountMap);
-        maxValue = MapSorts.getMaximum(hourCountMap);
+        int hourMinValue = MapSorts.getMinimum(hourCountMap);
+        int hourMaxValue = MapSorts.getMaximum(hourCountMap);
 
         for(Map.Entry<Text, IntWritable> entry : sortedHourAverage.entrySet()) {
-            if(entry.getValue().get() == minValue) {
+            if(entry.getValue().get() == hourMinValue) {
                 mos.write("bestHour", entry.getKey(), entry.getValue());
-            } else if(entry.getValue().get() == maxValue) {
+            } else if(entry.getValue().get() == hourMaxValue) {
                 mos.write("worstHour", entry.getKey(), entry.getValue());
             }
         }

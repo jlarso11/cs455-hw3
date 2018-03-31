@@ -32,24 +32,25 @@ public class BestTimeToFlyMapper extends Mapper<LongWritable, Text, Text, IntWri
             hourKey = hourKey.substring(0,1);
         }
 
-        int totalDelay = 0;
+        if(individualValues.length > 16) {
+            int totalDelay = 0;
 
-        if (TypeCheckUtil.isInteger(individualValues[14])) {
-            totalDelay += Integer.parseInt(individualValues[14]);
+            if (TypeCheckUtil.isInteger(individualValues[14])) {
+                totalDelay += Integer.parseInt(individualValues[14]);
+            }
+            if (TypeCheckUtil.isInteger(individualValues[15])) {
+                totalDelay += Integer.parseInt(individualValues[15]);
+            }
+
+            String dayKey = individualValues[3];
+            String monthKey = individualValues[1];
+
+            context.write(new Text("Day-" + dayKey), new IntWritable(totalDelay));
+            context.write(new Text("Month-"+monthKey), new IntWritable(totalDelay));
+            
+            if(TypeCheckUtil.isInteger(hourKey)){
+                context.write(new Text("Hour-"+hourKey), new IntWritable(totalDelay));
+            }
         }
-        if (TypeCheckUtil.isInteger(individualValues[15])) {
-            totalDelay += Integer.parseInt(individualValues[15]);
-        }
-
-        String dayKey = individualValues[3];
-        String monthKey = individualValues[1];
-
-        context.write(new Text("Day-" + dayKey), new IntWritable(totalDelay));
-        context.write(new Text("Month-"+monthKey), new IntWritable(totalDelay));
-        if(TypeCheckUtil.isInteger(hourKey)){
-            context.write(new Text("Hour-"+hourKey), new IntWritable(totalDelay));
-        }
-
-
     }
 }
