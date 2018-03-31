@@ -22,7 +22,8 @@ public class CityWithMostWeatherDelaysMapper2 extends Mapper<LongWritable, Text,
         String originKey = individualValues[0];
         originKey = originKey.replace("\"", "");
 
-        context.write(new Text(originKey), new Text("F2-" + value.toString()));
-
+        if(individualValues.length > 3) {
+            context.write(new Text(originKey), new Text("F2-" + individualValues[2]));
+        }
     }
 }

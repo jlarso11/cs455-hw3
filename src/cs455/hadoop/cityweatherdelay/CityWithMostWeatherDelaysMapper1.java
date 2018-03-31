@@ -22,16 +22,12 @@ public class CityWithMostWeatherDelaysMapper1 extends Mapper<LongWritable, Text,
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        if(individualValues.length > 17) {
-            if(individualValues.length >= 25 && isInteger(individualValues[25]) && Integer.parseInt(individualValues[25]) > 0) {
-                String originKey = individualValues[16];
+        if(individualValues.length > 25 && isInteger(individualValues[25]) && Integer.parseInt(individualValues[25]) > 0) {
+            String originKey = individualValues[16];
+            context.write(new Text(originKey), new Text("F1-" + individualValues[25]));
 
-                context.write(new Text(originKey), new Text("F1-" + value.toString()));
-
-                String destKey = individualValues[17];
-
-                context.write(new Text(destKey), new Text("F1-" + value.toString()));
-            }
+            String destKey = individualValues[17];
+            context.write(new Text(destKey), new Text("F1-" + individualValues[25]));
         }
     }
 }
