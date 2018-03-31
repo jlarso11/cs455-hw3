@@ -20,30 +20,26 @@ public class CityWithMostWeatherDelaysReducer extends Reducer<Text, Text, Text, 
     private static Map<Text, IntWritable> countMap = new HashMap<>();
 
     @Override
-    protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<Text> values, Context context) {
         String city = "";
         int delayedFlights = 0;
         for(Text value : values) {
             String[] fileSplit = value.toString().split("-");
 
             if("f2".equalsIgnoreCase(fileSplit[0])) {
-                String[] valueSplit = fileSplit[1].split(",");
-                if(valueSplit.length > 3) {
-                    city = valueSplit[2].replace("\"", "");
-                } else {
-                    return;
-                }
+                city = fileSplit[1].replace("\"", "");
             } else {
                 delayedFlights++;
             }
         }
 
-        if(countMap.containsKey(new Text(city))) {
-            delayedFlights += countMap.get(new Text(city)).get();
+        if(!"".equals(city)) {
+            if(countMap.containsKey(new Text(city))) {
+                delayedFlights += countMap.get(new Text(city)).get();
+            }
+
+            countMap.put(new Text(city), new IntWritable(delayedFlights));
         }
-
-        countMap.put(new Text(city), new IntWritable(delayedFlights));
-
     }
 
     @Override
