@@ -16,7 +16,7 @@ import java.util.Map;
 public class CityWithMostTrafficReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
     private static Map<String, Map<Text, IntWritable>> countMap = new HashMap<>();
-
+    private static Map<Text, IntWritable> overallCount = new HashMap<>();
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) {
@@ -38,11 +38,28 @@ public class CityWithMostTrafficReducer extends Reducer<Text, IntWritable, Text,
             }
 
             countMap.get(year).put(new Text(keySplit[1]), totalCount);
+
+            if(overallCount.containsKey(new Text(keySplit[1]))) {
+                count += overallCount.get(new Text(keySplit[1])).get();
+            }
+
+            overallCount.put(new Text(keySplit[1]), new IntWritable(count));
         }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
+
+        context.write(new Text("Overall Results"), new IntWritable(-1));
+        Map<Text, IntWritable> overallSortedMap = MapSorts.sortByValues(overallCount, -1);
+        int overallCounter = 0;
+        for(Map.Entry<Text, IntWritable> yearEntry : overallSortedMap.entrySet()) {
+            if(overallCounter == 10) {
+                break;
+            }
+            context.write(yearEntry.getKey(), yearEntry.getValue());
+            overallCounter++;
+        }
 
         for(Map.Entry<String, Map<Text, IntWritable>> entry : countMap.entrySet()) {
             Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(entry.getValue(), -1);
