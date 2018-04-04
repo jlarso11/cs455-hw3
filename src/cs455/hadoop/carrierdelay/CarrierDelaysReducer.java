@@ -66,16 +66,31 @@ public class CarrierDelaysReducer extends Reducer<Text, Text, Text, Text> {
         Map<Text, IntWritable> sortedMinuteCount = MapSorts.sortByValues(totalMinuteMap, -1);
         Map<Text, IntWritable> sortedAverageCount = MapSorts.sortByValues(totalAverageMap, -1);
 
+        int counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedCountMap.entrySet()) {
+            if(counter==10) {
+                break;
+            }
             mos.write("totalDelays", entry.getKey(), entry.getValue());
+            counter++;
         }
 
+        counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedMinuteCount.entrySet()) {
+            if(counter==10) {
+                break;
+            }
             mos.write("totalDelayMinutes", entry.getKey(), entry.getValue());
+            counter++;
         }
 
+        counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedAverageCount.entrySet()) {
+            if(counter==10) {
+                break;
+            }
             mos.write("averageDelay", entry.getKey(), entry.getValue());
+            counter++;
         }
 
         mos.close();
