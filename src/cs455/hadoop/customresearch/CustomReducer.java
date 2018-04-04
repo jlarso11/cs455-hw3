@@ -95,11 +95,24 @@ public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
 
             Map<Text, IntWritable> carrierStats = averageMap.get(entry.getKey());
 
+            double standardDeviation = getStandardDeviation(carrierStats, entry.getValue().get());
+
             Map<Text, IntWritable> sortedCarrierMap = MapSorts.sortByValues(carrierStats, -1);
             for(Map.Entry<Text, IntWritable> sortedCarrierEntry : sortedCarrierMap.entrySet()) {
                 context.write(new Text("\t" + carrierNames.get(sortedCarrierEntry.getKey())), sortedCarrierEntry.getValue());
+                double numberOfStdDevAway = Math.abs(entry.getValue().get() - sortedCarrierEntry.getValue().get()) / standardDeviation;
+                context.write(new Text("\t\t std dev"), new IntWritable((int) Math.round(numberOfStdDevAway)));
             }
 
         }
+    }
+
+    private double getStandardDeviation(Map<Text, IntWritable> carrierStats, int overallAverage) {
+        int sumOfSquares = 0;
+        for(Map.Entry<Text, IntWritable> entry : carrierStats.entrySet()) {
+            sumOfSquares += Math.abs(entry.getValue().get() - overallAverage);
+        }
+
+        return Math.round(Math.sqrt(sumOfSquares));
     }
 }
