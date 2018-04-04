@@ -101,7 +101,7 @@ public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
             for(Map.Entry<Text, IntWritable> sortedCarrierEntry : sortedCarrierMap.entrySet()) {
                 context.write(new Text("\t" + carrierNames.get(sortedCarrierEntry.getKey())), sortedCarrierEntry.getValue());
                 double numberOfStdDevAway = Math.abs(entry.getValue().get() - sortedCarrierEntry.getValue().get()) / standardDeviation;
-                context.write(new Text("\t\t std dev"), new IntWritable((int) Math.round(numberOfStdDevAway)));
+                context.write(new Text("\t\t std dev from mean"), new IntWritable((int) Math.round(numberOfStdDevAway)));
             }
 
         }
