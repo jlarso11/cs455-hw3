@@ -53,7 +53,7 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
                         } else {
                             processFlight(flight, year, false);
                         }
-                        
+
                         flightsToBeProcessed.remove(i);
                     }
                 }
@@ -78,16 +78,20 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        context.write(new Text("Total Delayed flights on old planes"), new LongWritable(delayedFlightsOver20years));
-        context.write(new Text("Total flights on old planes"), new LongWritable(totalFlightsOver20years));
+        LongWritable delayedFlights = new LongWritable(delayedFlightsOver20years);
+        LongWritable totalFlights = new LongWritable(totalFlightsOver20years);
+        context.write(new Text("Total Delayed flights on old planes"), delayedFlights);
+        context.write(new Text("Total flights on old planes"), totalFlights);
 
 //        if(totalFlightsOver20years > 0) {
 //            long average = (long)(new Double(delayedFlightsOver20years)/totalFlightsOver20years * 100);
 //            context.write(new Text("Percent of delayed flights on old planes"), new LongWritable(average));
 //        }
 
-        context.write(new Text("Total Delayed flights on newer planes"), new LongWritable(delayedFlightsUnder20years));
-        context.write(new Text("Total flights on newer planes"), new LongWritable(totalFlightsUnder20years));
+        delayedFlights = new LongWritable(delayedFlightsUnder20years);
+        totalFlights =  new LongWritable(totalFlightsUnder20years);
+        context.write(new Text("Total Delayed flights on newer planes"), delayedFlights);
+        context.write(new Text("Total flights on newer planes"), totalFlights);
 
 //        if(totalFlightsUnder20years > 0) {
 //            long average = (long)(new Double(delayedFlightsUnder20years)/totalFlightsUnder20years * 100);
