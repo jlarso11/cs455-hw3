@@ -19,21 +19,6 @@ import java.util.Map;
  */
 public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritable> {
 
-    private class flightDetails {
-        int year;
-        boolean hadDelay;
-
-
-        public flightDetails(int year, boolean hadDelay) {
-            this.year = year;
-            this.hadDelay = hadDelay;
-        }
-
-        public int getYear() {
-            return year;
-        }
-    }
-
     private long totalFlightsOver20years = 0;
     private long delayedFlightsOver20years=0;
     private long totalFlightsUnder20years = 0;
@@ -53,18 +38,24 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
         }
     }
     @Override
-    protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<Text> values, Context context) {
         int year =0;
-        List<flightDetails> flightCounts = new ArrayList<>();
+        ArrayList<Integer> flightsToBeProcessed = new ArrayList<>();
         for(Text value : values) {
             String[] fileSplit = value.toString().split("-");
             if("f2".equalsIgnoreCase(fileSplit[0]) && TypeCheckUtil.isInteger(fileSplit[1])) {
                 year = Integer.parseInt(fileSplit[1]);
-                if(flightCounts.size() > 0) {
-                    for(flightDetails flight : flightCounts) {
-                        processFlight(flight.getYear(), year, flight.hadDelay);
+                if(flightsToBeProcessed.size() > 0) {
+                    for(int i = 0; i < flightsToBeProcessed.size(); i++) {
+                        int flight = flightsToBeProcessed.get(i);
+                        if(flight < 0) {
+                            processFlight(flight*-1, year, true);
+                        } else {
+                            processFlight(flight, year, false);
+                        }
+                        
+                        flightsToBeProcessed.remove(i);
                     }
-                    flightCounts = new ArrayList<>();
                 }
             } else {
                 String[] valueSplit = fileSplit[1].split(",");
@@ -74,7 +65,11 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
                     if(year > 0) {
                         processFlight(yearOfFlight, year, hadDelay);
                     } else {
-                        flightCounts.add(new flightDetails(yearOfFlight, hadDelay));
+                        if(hadDelay){
+                            flightsToBeProcessed.add(-1*year);
+                        } else {
+                            flightsToBeProcessed.add(year);
+                        }
                     }
                 }
             }
@@ -86,17 +81,17 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
         context.write(new Text("Total Delayed flights on old planes"), new LongWritable(delayedFlightsOver20years));
         context.write(new Text("Total flights on old planes"), new LongWritable(totalFlightsOver20years));
 
-        if(totalFlightsOver20years > 0) {
-            long average = (long)(new Double(delayedFlightsOver20years)/totalFlightsOver20years * 100);
-            context.write(new Text("Percent of delayed flights on old planes"), new LongWritable(average));
-        }
+//        if(totalFlightsOver20years > 0) {
+//            long average = (long)(new Double(delayedFlightsOver20years)/totalFlightsOver20years * 100);
+//            context.write(new Text("Percent of delayed flights on old planes"), new LongWritable(average));
+//        }
 
         context.write(new Text("Total Delayed flights on newer planes"), new LongWritable(delayedFlightsUnder20years));
         context.write(new Text("Total flights on newer planes"), new LongWritable(totalFlightsUnder20years));
 
-        if(totalFlightsUnder20years > 0) {
-            long average = (long)(new Double(delayedFlightsUnder20years)/totalFlightsUnder20years * 100);
-            context.write(new Text("Percent of delayed flights on newer planes"), new LongWritable(average));
-        }
+//        if(totalFlightsUnder20years > 0) {
+//            long average = (long)(new Double(delayedFlightsUnder20years)/totalFlightsUnder20years * 100);
+//            context.write(new Text("Percent of delayed flights on newer planes"), new LongWritable(average));
+//        }
     }
 }
