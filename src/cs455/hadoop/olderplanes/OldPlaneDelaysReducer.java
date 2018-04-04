@@ -32,10 +32,6 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
         public int getYear() {
             return year;
         }
-
-        public boolean isHadDelay() {
-            return hadDelay;
-        }
     }
 
     private long totalFlightsOver20years = 0;
@@ -43,6 +39,19 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
     private long totalFlightsUnder20years = 0;
     private long delayedFlightsUnder20years = 0;
 
+    private void processFlight(int yearOfFlight, int planeYear, boolean hadDelay) {
+        if(yearOfFlight - planeYear > 20) {
+            totalFlightsOver20years++;
+            if(hadDelay) {
+                delayedFlightsOver20years++;
+            }
+        } else {
+            totalFlightsUnder20years++;
+            if(hadDelay) {
+                delayedFlightsUnder20years++;
+            }
+        }
+    }
     @Override
     protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         int year =0;
@@ -51,27 +60,21 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
             String[] fileSplit = value.toString().split("-");
             if("f2".equalsIgnoreCase(fileSplit[0]) && TypeCheckUtil.isInteger(fileSplit[1])) {
                 year = Integer.parseInt(fileSplit[1]);
+                if(flightCounts.size() > 0) {
+                    for(flightDetails flight : flightCounts) {
+                        processFlight(flight.getYear(), year, flight.hadDelay);
+                    }
+                    flightCounts = new ArrayList<>();
+                }
             } else {
                 String[] valueSplit = fileSplit[1].split(",");
                 if(valueSplit.length > 1 && TypeCheckUtil.isInteger(valueSplit[0]) && TypeCheckUtil.isInteger(valueSplit[1])) {
                     int yearOfFlight = Integer.parseInt(valueSplit[0]);
                     boolean hadDelay = Integer.parseInt(valueSplit[1]) > 0;
-                    flightCounts.add(new flightDetails(yearOfFlight, hadDelay));
-                }
-            }
-        }
-
-        if(year > 0) {
-            for(flightDetails flight : flightCounts) {
-                if(flight.getYear() - year > 20) {
-                    totalFlightsOver20years++;
-                    if(flight.hadDelay) {
-                        delayedFlightsOver20years++;
-                    }
-                } else {
-                    totalFlightsUnder20years++;
-                    if(flight.hadDelay) {
-                        delayedFlightsUnder20years++;
+                    if(year > 0) {
+                        processFlight(yearOfFlight, year, hadDelay);
+                    } else {
+                        flightCounts.add(new flightDetails(yearOfFlight, hadDelay));
                     }
                 }
             }
