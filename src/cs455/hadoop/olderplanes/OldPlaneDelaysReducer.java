@@ -1,17 +1,12 @@
 package cs455.hadoop.olderplanes;
 
-import cs455.hadoop.customresearch.FlightCounts;
-import cs455.hadoop.utils.MapSorts;
 import cs455.hadoop.utils.TypeCheckUtil;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -86,7 +81,7 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
         context.write(new Text("Total flights on old planes"), new LongWritable(totalFlightsOver20Years));
 
         if(totalFlightsOver20Years > 0) {
-            long average = (long)(new Double(delayedFlightsOver20Years)/totalFlightsOver20Years * 100);
+            long average = (long)((double) delayedFlightsOver20Years /totalFlightsOver20Years * 100);
             context.write(new Text("Percent of delayed flights on old planes"), new LongWritable(average));
         }
 
@@ -95,7 +90,7 @@ public class OldPlaneDelaysReducer extends Reducer<Text, Text, Text, LongWritabl
         context.write(new Text("Total flights on newer planes"), new LongWritable(totalFlightsUnder20Years));
 
         if(totalFlightsUnder20Years > 0) {
-            long average = (long)(new Double(delayedFlightsUnder20Years)/totalFlightsUnder20Years * 100);
+            long average = (long)((double) delayedFlightsUnder20Years /totalFlightsUnder20Years * 100);
             context.write(new Text("Percent of delayed flights on newer planes"), new LongWritable(average));
         }
     }
