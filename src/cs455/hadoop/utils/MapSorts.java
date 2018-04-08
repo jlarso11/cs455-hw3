@@ -46,4 +46,32 @@ public class MapSorts {
         return max;
     }
 
+    public static List<Integer> getIndexOfLargest( int[] array ) {
+        int[] tempArray = array.clone();
+        Arrays.sort(tempArray );
+        int max = tempArray[tempArray .length - 1];
+
+        List<Integer> allTheHighestValues = new LinkedList<>();
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == max) {
+                allTheHighestValues.add(i);
+            }
+        }
+        return allTheHighestValues; // position of the first largest found
+    }
+
+    public static List<Integer> getIndexOfLowest( int[] array ) {
+        int[] tempArray = array.clone();
+        Arrays.sort(tempArray );
+        int max = tempArray[0];
+
+        List<Integer> allTheLowestValues = new LinkedList<>();
+        for(int i = 0; i < array.length; i++) {
+            if(array[i] == max) {
+                allTheLowestValues.add(i);
+            }
+        }
+        return allTheLowestValues; // position of the first largest found
+    }
+
 }

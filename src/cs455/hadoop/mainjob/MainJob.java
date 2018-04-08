@@ -4,11 +4,14 @@ import cs455.hadoop.utils.AverageCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
@@ -45,6 +48,14 @@ public class MainJob {
             // elaboration.
             job.setOutputKeyClass(Text.class);
             job.setOutputValueClass(IntWritable.class);
+
+            MultipleOutputs.addNamedOutput(job, "bestTimeToFly", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "worstTimeToFly", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "majorHubs", TextOutputFormat.class, Text.class, IntWritable.class);
+
+            MultipleOutputs.addNamedOutput(job, "carrierDelays", TextOutputFormat.class, Text.class, IntWritable.class);
+            MultipleOutputs.addNamedOutput(job, "olderPlanes", TextOutputFormat.class, Text.class, LongWritable.class);
+            MultipleOutputs.addNamedOutput(job, "weatherDelayCities", TextOutputFormat.class, Text.class, IntWritable.class);
 
             // path to output in HDFS
             FileOutputFormat.setOutputPath(job, new Path(args[4]));

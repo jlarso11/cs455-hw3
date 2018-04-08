@@ -7,6 +7,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,6 +40,12 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
     private static int[] monthAverage = new int[12];
     private static String[] days =  {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
     private static String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    private MultipleOutputs<Text, IntWritable> mos;
+
+    @Override
+    public void setup(Context context) {
+        mos = new MultipleOutputs(context);
+    }
 
     private void processCarrierFlightDelayedCount(Text carrier, int totalCount) {
         if(carrierTotalCountMap.containsKey(carrier)) {
@@ -170,34 +177,6 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
         }
     }
 
-    private List<Integer> getIndexOfLargest( int[] array ) {
-        int[] tempArray = array.clone();
-        Arrays.sort(tempArray );
-        int max = tempArray[tempArray .length - 1];
-
-        List<Integer> allTheHighestValues = new LinkedList<>();
-        for(int i = 0; i < array.length; i++) {
-            if(array[i] == max) {
-                allTheHighestValues.add(i);
-            }
-        }
-        return allTheHighestValues; // position of the first largest found
-    }
-
-    private List<Integer> getIndexOfLowest( int[] array ) {
-        int[] tempArray = array.clone();
-        Arrays.sort(tempArray );
-        int max = tempArray[0];
-
-        List<Integer> allTheLowestValues = new LinkedList<>();
-        for(int i = 0; i < array.length; i++) {
-            if(array[i] == max) {
-                allTheLowestValues.add(i);
-            }
-        }
-        return allTheLowestValues; // position of the first largest found
-    }
-
     @Override
     protected void reduce(Text key, Iterable<Text> values, Context context) {
         for(Text value : values){
@@ -261,81 +240,80 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
         }
     }
 
-    private void printTopDays(Context context) throws IOException, InterruptedException {
+    private void printTopDays() throws IOException, InterruptedException {
         this.populateAverageForBestTimeToFly();
 
-        List<Integer> topDays = this.getIndexOfLowest(dayAverage);
-        List<Integer> worstDays = this.getIndexOfLargest(dayAverage);
+        List<Integer> topDays = MapSorts.getIndexOfLowest(dayAverage);
+        List<Integer> worstDays = MapSorts.getIndexOfLargest(dayAverage);
 
         for(int i = 0; i < topDays.size(); i++) {
-            context.write(new Text(days[topDays.get(i)]), new IntWritable(dayAverage[topDays.get(i)]));
+            mos.write("bestTimeToFly", new Text(days[topDays.get(i)]), new IntWritable(dayAverage[topDays.get(i)]));
         }
 
         for(int i = 0; i < worstDays.size(); i++) {
-            context.write(new Text(days[worstDays.get(i)]), new IntWritable(dayAverage[worstDays.get(i)]));
+            mos.write("worstTimeToFly", new Text(days[worstDays.get(i)]), new IntWritable(dayAverage[worstDays.get(i)]));
         }
 
-        List<Integer> topHours = this.getIndexOfLowest(hourAverage);
-        List<Integer> worstHours = this.getIndexOfLargest(hourAverage);
+        List<Integer> topHours = MapSorts.getIndexOfLowest(hourAverage);
+        List<Integer> worstHours = MapSorts.getIndexOfLargest(hourAverage);
 
         for(int i = 0; i < topHours.size(); i++) {
-            context.write(new Text(topHours.get(i).toString()), new IntWritable(hourAverage[topHours.get(i)]));
+            mos.write("bestTimeToFly", new Text(topHours.get(i).toString()), new IntWritable(hourAverage[topHours.get(i)]));
         }
 
         for(int i = 0; i < worstHours.size(); i++) {
-            context.write(new Text(worstHours.get(i).toString()), new IntWritable(hourAverage[worstHours.get(i)]));
+            mos.write("worstTimeToFly", new Text(worstHours.get(i).toString()), new IntWritable(hourAverage[worstHours.get(i)]));
         }
 
-        List<Integer> topMonths = this.getIndexOfLowest(monthAverage);
-        List<Integer> worstMonths = this.getIndexOfLargest(monthAverage);
+        List<Integer> topMonths = MapSorts.getIndexOfLowest(monthAverage);
+        List<Integer> worstMonths = MapSorts.getIndexOfLargest(monthAverage);
 
         for(int i = 0; i < topMonths.size(); i++) {
-            context.write(new Text(months[topMonths.get(i)]), new IntWritable(monthAverage[topMonths.get(i)]));
+            mos.write("bestTimeToFly", new Text(months[topMonths.get(i)]), new IntWritable(monthAverage[topMonths.get(i)]));
         }
 
         for(int i = 0; i < worstMonths.size(); i++) {
-            context.write(new Text(months[worstMonths.get(i)]), new IntWritable(monthAverage[worstMonths.get(i)]));
+            mos.write("worstTimeToFly", new Text(months[worstMonths.get(i)]), new IntWritable(monthAverage[worstMonths.get(i)]));
         }
 
     }
 
-    private void printOldPlaneInfo(Context context) throws IOException, InterruptedException {
+    private void printOldPlaneInfo() throws IOException, InterruptedException {
         int[] oldPlaneData = this.calculateOldPlaneStats();
 
-        context.write(new Text("Total Delayed flights on old planes"), new IntWritable(oldPlaneData[3]));
-        context.write(new Text("Total flights on old planes"), new IntWritable(oldPlaneData[2]));
+        mos.write("olderPlanes", new Text("Total Delayed flights on old planes"), new IntWritable(oldPlaneData[3]));
+        mos.write("olderPlanes", new Text("Total flights on old planes"), new IntWritable(oldPlaneData[2]));
 
         if(oldPlaneData[2] > 0) {
             int average = (int)((double) oldPlaneData[3] /oldPlaneData[2] * 100);
-            context.write(new Text("Percent of delayed flights on old planes"), new IntWritable(average));
+            mos.write("olderPlanes", new Text("Percent of delayed flights on old planes"), new IntWritable(average));
         }
 
 
-        context.write(new Text("Total Delayed flights on newer planes"), new IntWritable(oldPlaneData[1]));
-        context.write(new Text("Total flights on newer planes"), new IntWritable(oldPlaneData[0]));
+        mos.write("olderPlanes", new Text("Total Delayed flights on newer planes"), new IntWritable(oldPlaneData[1]));
+        mos.write("olderPlanes", new Text("Total flights on newer planes"), new IntWritable(oldPlaneData[0]));
 
         if(oldPlaneData[0] > 0) {
-            int average = (int)((double) oldPlaneData[1] /oldPlaneData[2] * 100);
-            context.write(new Text("Percent of delayed flights on newer planes"), new IntWritable(average));
+            int average = (int)((double) oldPlaneData[1] /oldPlaneData[0] * 100);
+            mos.write("olderPlanes", new Text("Percent of delayed flights on newer planes"), new IntWritable(average));
         }
     }
 
-    private void printCityDelayInfo(Context context) throws IOException, InterruptedException {
+    private void printCityDelayInfo() throws IOException, InterruptedException {
         this.combineAirportDelaysToCities();
         Map<Text, IntWritable> sortedCityDelayMap = MapSorts.sortByValues(cityWeatherDelays, -1);
 
-        context.write(new Text("\t\tCity Delay results"), new IntWritable(-1));
         int counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedCityDelayMap.entrySet()) {
             if(counter==10) {
                 break;
             }
-            context.write(entry.getKey(), entry.getValue());
+            mos.write("weatherDelayCities", entry.getKey(), entry.getValue());
             counter++;
         }
     }
 
-    private void printCarrierDelayInfo(Context context) throws IOException, InterruptedException {
+    private void printCarrierDelayInfo() throws IOException, InterruptedException {
         this.averageCarrierDelays();
 
         Map<Text, IntWritable> sortedCountMap = MapSorts.sortByValues(carrierTotalCountMap, -1);
@@ -344,39 +322,38 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
 
         int counter = 0;
 
-        context.write(new Text("\t\ttotal flight count"), new IntWritable(-1));
+        mos.write("carrierDelays", new Text("\t\ttotal flight count"), new IntWritable(-1));
         for(Map.Entry<Text, IntWritable> entry : sortedCountMap.entrySet()) {
             if(counter==10) {
                 break;
             }
-            context.write(carrierNames.get(entry.getKey()), entry.getValue());
+            mos.write("carrierDelays", carrierNames.get(entry.getKey()), entry.getValue());
             counter++;
         }
 
-        context.write(new Text("\t\ttotal minute count"), new IntWritable(-1));
+        mos.write("carrierDelays", new Text("\t\ttotal minute count"), new IntWritable(-1));
         counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedMinuteCount.entrySet()) {
             if(counter==10) {
                 break;
             }
-            context.write(carrierNames.get(entry.getKey()), entry.getValue());
+            mos.write("carrierDelays", carrierNames.get(entry.getKey()), entry.getValue());
             counter++;
         }
 
-        context.write(new Text("\t\taverage delay"), new IntWritable(-1));
+        mos.write("carrierDelays", new Text("\t\taverage delay"), new IntWritable(-1));
         counter = 0;
         for(Map.Entry<Text, IntWritable> entry : sortedAverageCount.entrySet()) {
             if(counter==10) {
                 break;
             }
-            context.write(carrierNames.get(entry.getKey()), entry.getValue());
+            mos.write("carrierDelays", carrierNames.get(entry.getKey()), entry.getValue());
             counter++;
         }
     }
 
-    private void printPopularAirportInfo(Context context) throws IOException, InterruptedException {
-        context.write(new Text("Overall Results"), new IntWritable(-1));
-        context.write(new Text("total number of results"), new IntWritable(totalPopularAirports.size()));
+    private void printPopularAirportInfo() throws IOException, InterruptedException {
+        mos.write("majorHubs", new Text("Overall Results"), new IntWritable(-1));
         Map<Text, IntWritable> overallSortedMap = MapSorts.sortByValues(totalPopularAirports, -1);
 
         int overallCounter = 0;
@@ -384,20 +361,20 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
             if(overallCounter == 10) {
                 break;
             }
-            context.write(yearEntry.getKey(), yearEntry.getValue());
+            mos.write("majorHubs", yearEntry.getKey(), yearEntry.getValue());
             overallCounter++;
         }
 
         for(Map.Entry<String, Map<Text, IntWritable>> entry : popularAirports.entrySet()) {
             Map<Text, IntWritable> sortedMap = MapSorts.sortByValues(entry.getValue(), -1);
 
-            context.write(new Text(entry.getKey()), new IntWritable(-1));
+            mos.write("majorHubs", new Text(entry.getKey()), new IntWritable(-1));
             int counter = 0;
             for(Map.Entry<Text, IntWritable> yearEntry : sortedMap.entrySet()) {
                 if(counter == 10) {
                     break;
                 }
-                context.write(yearEntry.getKey(), yearEntry.getValue());
+                mos.write("majorHubs", yearEntry.getKey(), yearEntry.getValue());
                 counter++;
             }
         }
@@ -405,10 +382,12 @@ public class MainReducer extends Reducer<Text, Text, Text, IntWritable> {
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        this.printTopDays(context);
-        this.printOldPlaneInfo(context);
-        this.printCityDelayInfo(context);
-        this.printCarrierDelayInfo(context);
-        this.printPopularAirportInfo(context);
+        this.printTopDays();
+        this.printOldPlaneInfo();
+        this.printCityDelayInfo();
+        this.printCarrierDelayInfo();
+        this.printPopularAirportInfo();
+
+        mos.close();
     }
 }
