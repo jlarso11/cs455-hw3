@@ -1,6 +1,7 @@
 package cs455.hadoop.customresearch;
 
 import cs455.hadoop.utils.MapSorts;
+import cs455.hadoop.utils.TypeCheckUtil;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -26,17 +27,18 @@ public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
             else if("f3".equalsIgnoreCase(fileSplit[0])) {
                 airportNames.put(new Text(key), new Text(fileSplit[1]));
             }
-            else {
+            else if(fileSplit.length == 2) {
                 String[] valueSplit = fileSplit[1].split(",");
-
-                if(valueSplit.length == 2) {
+                if(valueSplit.length == 3 && TypeCheckUtil.isInteger(valueSplit[0]) && TypeCheckUtil.isInteger(valueSplit[2])) {
                     Text mapKey = new Text(valueSplit[1]);
                     int totalDelayForFlight = Integer.parseInt(valueSplit[0]);
+                    int totalFlightCount = Integer.parseInt(valueSplit[2]);
+
                     //total count addition
                     if(!overallCount.containsKey(mapKey)) {
-                        overallCount.put(mapKey, new FlightCounts(1, totalDelayForFlight));
+                        overallCount.put(mapKey, new FlightCounts(totalFlightCount, totalDelayForFlight));
                     } else {
-                        overallCount.get(mapKey).incrementValues(totalDelayForFlight);
+                        overallCount.get(mapKey).incrementValues(totalDelayForFlight, totalFlightCount);
                     }
 
                     //each carrier at each airport addition
@@ -45,7 +47,7 @@ public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
 
                     if(!countMap.containsKey(airportCode)) {
                         Map<Text, FlightCounts> carrierInfo = new HashMap<>();
-                        carrierInfo.put(carrierCode, new FlightCounts(1, totalDelayForFlight));
+                        carrierInfo.put(carrierCode, new FlightCounts(totalFlightCount, totalDelayForFlight));
                         countMap.put(airportCode, carrierInfo);
                     } else { // airport is already in the map
                         Map<Text, FlightCounts> foundMap = countMap.get(airportCode);
@@ -53,7 +55,7 @@ public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
                         if(!foundMap.containsKey(carrierCode)) {
                             foundMap.put(carrierCode, new FlightCounts(1, totalDelayForFlight));
                         } else { //carrier is already in there.
-                            foundMap.get(carrierCode).incrementValues(totalDelayForFlight);
+                            foundMap.get(carrierCode).incrementValues(totalDelayForFlight, totalFlightCount);
                         }
                     }
 

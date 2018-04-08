@@ -8,9 +8,6 @@ import java.io.IOException;
 
 import static cs455.hadoop.utils.TypeCheckUtil.isInteger;
 
-/**
- * Mapper: Reads line by line, split them into words. Emit <word, 1> pairs.
- */
 public class CustomMapper1 extends Mapper<LongWritable, Text, Text, Text> {
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
@@ -21,7 +18,7 @@ public class CustomMapper1 extends Mapper<LongWritable, Text, Text, Text> {
 
         String[] individualValues = valueConvertedToString.split(",");
 
-        String mapperKey = individualValues[8];
+        String mapperKey = individualValues[8] + "," + individualValues[16];
 
         if(individualValues.length > 25) {
             Integer totalDelay = 0;
@@ -30,10 +27,8 @@ public class CustomMapper1 extends Mapper<LongWritable, Text, Text, Text> {
                 totalDelay += Integer.parseInt(individualValues[24]);
             }
 
-            String valueToPassAlong = totalDelay + "," + individualValues[16];
-
             if(totalDelay > 0) {
-                context.write(new Text(mapperKey), new Text("F1-" + valueToPassAlong));
+                context.write(new Text(mapperKey), new Text("F1-" + totalDelay.toString()));
             }
         }
     }

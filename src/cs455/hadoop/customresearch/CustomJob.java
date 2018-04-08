@@ -8,14 +8,9 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
-/**
- * This is the main class. Hadoop will invoke the main method of this class.
- */
 public class CustomJob {
     public static void main(String[] args) {
         try {
@@ -26,8 +21,11 @@ public class CustomJob {
             job.setJarByClass(CustomJob.class);
 
             MultipleInputs.addInputPath(job,new Path(args[0]), TextInputFormat.class, CustomMapper1.class);
-            MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class, CustomMapper2.class);
-            MultipleInputs.addInputPath(job, new Path(args[3]), TextInputFormat.class, CustomMapper3.class);
+            MultipleInputs.addInputPath(job, new Path(args[1]), TextInputFormat.class, CustomMapper2.class);
+            MultipleInputs.addInputPath(job, new Path(args[2]), TextInputFormat.class, CustomMapper3.class);
+
+            // Combiner. We use the reducer as the combiner in this case.
+            job.setCombinerClass(CustomCombiner.class);
 
             // Reducer
             job.setReducerClass(CustomReducer.class);
@@ -43,15 +41,11 @@ public class CustomJob {
             job.setOutputValueClass(IntWritable.class);
 
             // path to output in HDFS
-            FileOutputFormat.setOutputPath(job, new Path(args[1]));
+            FileOutputFormat.setOutputPath(job, new Path(args[3]));
 
             // Block until the job is completed.
             System.exit(job.waitForCompletion(true) ? 0 : 1);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        } catch (InterruptedException e) {
-            System.err.println(e.getMessage());
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | InterruptedException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
         }
 

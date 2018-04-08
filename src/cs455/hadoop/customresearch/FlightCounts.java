@@ -20,8 +20,8 @@ public class FlightCounts {
         return totalDelay;
     }
 
-    public void incrementValues(int totalDelay) {
-        totalFlights++;
+    public void incrementValues(int totalDelay, int totalFlightCounts) {
+        this.totalFlights += totalFlightCounts;
         this.totalDelay += totalDelay;
     }
 

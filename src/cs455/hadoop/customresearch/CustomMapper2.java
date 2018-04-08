@@ -6,9 +6,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 
-/**
- * Mapper: Reads line by line, split them into words. Emit <word, 1> pairs.
- */
 public class CustomMapper2 extends Mapper<LongWritable, Text, Text, Text> {
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
