@@ -4,7 +4,7 @@
 
 Assumption Made: 
 
-Question 1 and 2: minimizing delays meant finding the lowest average delay.
+Question 1 and 2: minimizing delays meant finding the lowest average delay - maximizing average led to the worst time to fly.
 
 Question 5: Old planes are considered over 20 years old and not 20 years or older. 
 
@@ -26,7 +26,7 @@ For question 6, the file is named weatherDelayCities
 
 To generate these files, run the following command: 
 
-$HADOOP_HOME/bin/hadoop jar dist/wordcount.jar cs455.hadoop.mainjob.MainJob /data/main /data/supplementary/airports.csv /data/supplementary/carriers.csv /data/supplementary/plane-data.csv /home/cs455/jlarso11-hw3-output
+$HADOOP_HOME/bin/hadoop jar dist/wordcount.jar cs455.hadoop.mainjob.MainJob /data/main /data/supplementary/airports.csv /data/supplementary/carriers.csv /data/supplementary/plane-data.csv {output file}
 
 The thought process behind question #7 was to come up withsomething that the startup company would be able to sell to airline companies.  I figured that each airline company is trying to minimize their delay times as much as possible to give their customers a better experience. 
 
@@ -38,3 +38,6 @@ The values reported from this job is the average for each company and the number
 
 To generate the results for question 7: 
 
+$HADOOP_HOME/bin/hadoop jar dist/wordcount.jar cs455.hadoop.customresearch.CustomJob /data/main /data/supplementary/carriers.csv /data/supplementary/airports.csv {output file}
+
+The next steps would be to give the paying airline company a compiled list of the results for their airline at each airport compared to the mean of that airport.
