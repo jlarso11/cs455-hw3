@@ -2,6 +2,10 @@
 
 #### By Joseph Larson
 
+To clean: ant clean
+
+To build: ant dist
+
 Assumption Made: 
 
 Question 1 and 2: minimizing delays meant finding the lowest average delay - maximizing average led to the worst time to fly.
