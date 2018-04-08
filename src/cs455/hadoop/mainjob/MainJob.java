@@ -1,6 +1,5 @@
 package cs455.hadoop.mainjob;
 
-import cs455.hadoop.utils.AverageCombiner;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -15,9 +14,6 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
-/**
- * This is the main class. Hadoop will invoke the main method of this class.
- */
 public class MainJob {
     public static void main(String[] args) {
         try {

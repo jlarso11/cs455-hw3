@@ -4,16 +4,11 @@ import cs455.hadoop.utils.MapSorts;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Reducer: Input to the reducer is the output from the mapper. It receives word, list<count> pairs.
- * Sums up individual counts per given word. Emits <word, total count> pairs.
- */
 public class CustomReducer extends Reducer<Text, Text, Text, IntWritable> {
 
     private static Map<Text, Map<Text, FlightCounts>> countMap = new HashMap<>();
